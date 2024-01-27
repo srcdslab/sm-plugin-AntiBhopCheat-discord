@@ -1,3 +1,5 @@
-# sm-plugin-AntiBhopCheat-discord
+# AntiBhopCheat detections notifications to discord
+> [!IMPORTANT]
+> Requierement: [sm-plugin-AntiBhopCheat](https://github.com/srcdslab/sm-plugin-AntiBhopCheat)
 
-AntiBhopCheat detections notifications to discord
+![Preview](https://i.imgur.com/T2NYkTc.png)
