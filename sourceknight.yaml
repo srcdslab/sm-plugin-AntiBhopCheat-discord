@@ -1,0 +1,51 @@
+project:
+  sourceknight: 0.2
+  name: AntiBhopCheat_Discord
+  dependencies:
+    - name: sourcemod
+      type: tar
+      version: 1.11.0-git6934
+      location: https://sm.alliedmods.net/smdrop/1.11/sourcemod-1.11.0-git6934-linux.tar.gz
+      unpack:
+      - source: /addons
+        dest: /addons
+
+    - name: utilshelper
+      type: git
+      repo: https://github.com/srcdslab/sm-plugin-UtilsHelper
+      unpack:
+      - source: /addons/sourcemod/scripting/include
+        dest: /addons/sourcemod/scripting/include
+
+    - name: discordwebapi
+      type: git
+      repo: https://github.com/srcdslab/sm-plugin-DiscordWebhookAPI
+      unpack:
+      - source: /include
+        dest: /addons/sourcemod/scripting/include
+
+    - name: sourcebans-pp
+      type: git
+      repo: https://github.com/srcdslab/sourcebans-pp
+      unpack:
+      - source: /game/addons
+        dest: /addons
+
+    - name: Extended-Discord
+      type: git
+      repo: https://github.com/srcdslab/sm-plugin-Extended-Discord
+      unpack:
+      - source: /addons/sourcemod/scripting/include
+        dest: /addons/sourcemod/scripting/include
+
+    - name: selectivebhop
+      type: git
+      repo: https://github.com/srcdslab/sm-plugin-SelectiveBhop
+      unpack:
+      - source: /addons/sourcemod/scripting/include
+        dest: /addons/sourcemod/scripting/include
+
+  root: /
+  output: /addons/sourcemod/plugins
+  targets:
+    - AntiBhopCheat_Discord
