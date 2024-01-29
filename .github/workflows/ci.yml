@@ -83,7 +83,7 @@ jobs:
         run: |
           ls -Rall
           if [ -d "./package/" ]; then
-            cd ./Linux/
+            cd ./package/
             tar -czf ../${{ github.event.repository.name }}-${{ env.RELEASE_VERSION }}.tar.gz -T <(\ls -1)
             cd -
           fi
