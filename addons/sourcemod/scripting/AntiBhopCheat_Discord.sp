@@ -7,10 +7,6 @@
 #tryinclude <sourcebanschecker>
 #define REQUIRE_PLUGIN
 
-#define WEBHOOK_MSG_MAX_SIZE			2000
-#define WEBHOOK_URL_MAX_SIZE			1000
-#define WEBHOOK_THREAD_NAME_MAX_SIZE	100
-
 ConVar g_cvCountBots, g_cvWebhook, g_cvWebhookRetry, g_cvChannelType;
 ConVar g_cvThreadName, g_cvThreadID, g_cvAvatar;
 
@@ -24,7 +20,7 @@ public Plugin myinfo =
 	name			= "AntiBhopCheat Discord",
 	author			= ".Rushaway",
 	description		= "Send webhook when a bhop cheat is detected",
-	version			= "1.0.0",
+	version			= "1.0.1",
 	url				= "https://github.com/srcdslab/sm-plugin-AntiBhopCheat-discord"
 };
 
