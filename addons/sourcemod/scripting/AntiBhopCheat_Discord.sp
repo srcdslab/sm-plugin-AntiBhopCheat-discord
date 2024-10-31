@@ -20,7 +20,7 @@ public Plugin myinfo =
 	name			= "AntiBhopCheat Discord",
 	author			= ".Rushaway",
 	description		= "Send webhook when a bhop cheat is detected",
-	version			= "1.0.1",
+	version			= "1.0.2",
 	url				= "https://github.com/srcdslab/sm-plugin-AntiBhopCheat-discord"
 };
 
@@ -83,7 +83,7 @@ public void AntiBhopCheat_OnClientDetected(int client, char[] sReason, char[] sS
 	}
 
 	char sAuth[32];
-	GetClientAuthId(client, AuthId_Steam2, sAuth, sizeof(sAuth), false);
+	GetClientAuthId(client, AuthId_Steam3, sAuth, sizeof(sAuth), false);
 
 	char sPlayer[256];
 	if (g_Plugin_SourceBans) {
@@ -95,22 +95,22 @@ public void AntiBhopCheat_OnClientDetected(int client, char[] sReason, char[] sS
 		iClientComms = SBPP_CheckerGetClientsComms(client);
 	#endif
 
-		FormatEx(sPlayer, sizeof(sPlayer), "%N (%d bans - %d comms) [%s] %s.", client, iClientBans, iClientComms, sAuth, sReason);
+		FormatEx(sPlayer, sizeof(sPlayer), "%N (%d bans - %d comms) %s is suspected of using %s", client, iClientBans, iClientComms, sAuth, sReason);
 	} else {
-		FormatEx(sPlayer, sizeof(sPlayer), "%N [%s] %s.", client, sAuth, sReason);		
+		FormatEx(sPlayer, sizeof(sPlayer), "%N %s %s.", client, sAuth, sReason);
 	}
 
 	char sTime[64];
 	int iTime = GetTime();
-	FormatTime(sTime, sizeof(sTime), "Date : %d/%m/%Y @ %H:%M:%S", iTime);
+	FormatTime(sTime, sizeof(sTime), "%d/%m/%Y @ %H:%M:%S", iTime);
 
 	char sCount[32];
 	int iMaxPlayers = MaxClients;
 	int iConnected = GetPlayerCount(g_cvCountBots.BoolValue);
-	FormatEx(sCount, sizeof(sCount), "Players : %d/%d", iConnected, iMaxPlayers);
+	FormatEx(sCount, sizeof(sCount), "%d/%d", iConnected, iMaxPlayers);
 
 	char sHeader[512], sMessage[WEBHOOK_MSG_MAX_SIZE];
-	FormatEx(sHeader, sizeof(sHeader), "%s \nCurrent map : %s \n%s \n%s", sPlayer, g_sMap, sTime, sCount);
+	FormatEx(sHeader, sizeof(sHeader), "%s \nMap : %s (%s)\n%s", sPlayer, g_sMap, sCount, sTime);
 
 	// Discord character limit is 2000 (discord msg + stats)
 	if (strlen(sHeader) + strlen(sStats) < WEBHOOK_MSG_MAX_SIZE)
