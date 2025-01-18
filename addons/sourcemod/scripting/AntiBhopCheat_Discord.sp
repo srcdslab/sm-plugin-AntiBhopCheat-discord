@@ -15,12 +15,17 @@ char g_sPluginName[256];
 bool g_Plugin_SourceBans = false;
 bool g_Plugin_ExtDiscord = false;
 
+bool g_bNative_ExtDiscord = false;
+bool g_bNative_SbChecker_Bans = false;
+bool g_bNative_SbChecker_Mutes = false;
+bool g_bNative_SbChecker_Gags = false;
+
 public Plugin myinfo =
 {
 	name			= "AntiBhopCheat Discord",
 	author			= ".Rushaway",
 	description		= "Send webhook when a bhop cheat is detected",
-	version			= "1.0.2",
+	version			= "1.1.0",
 	url				= "https://github.com/srcdslab/sm-plugin-AntiBhopCheat-discord"
 };
 
@@ -50,22 +55,54 @@ public void OnAllPluginsLoaded()
 {
 	g_Plugin_SourceBans = LibraryExists("sourcebans++");
 	g_Plugin_ExtDiscord = LibraryExists("ExtendedDiscord");
+
+	VerifyNatives();
 }
 
 public void OnLibraryAdded(const char[] sName)
 {
 	if (strcmp(sName, "sourcebans++", false) == 0)
+	{
 		g_Plugin_SourceBans = true;
+		VerifyNative_SbChecker();
+	}
 	if (strcmp(sName, "ExtendedDiscord", false) == 0)
+	{
 		g_Plugin_ExtDiscord = true;
+		VerifyNative_ExtDiscord();
+	}
 }
 
 public void OnLibraryRemoved(const char[] sName)
 {
 	if (strcmp(sName, "sourcebans++", false) == 0)
+	{
 		g_Plugin_SourceBans = false;
+		VerifyNative_SbChecker();
+	}
 	if (strcmp(sName, "ExtendedDiscord", false) == 0)
+	{
 		g_Plugin_ExtDiscord = false;
+		VerifyNative_ExtDiscord();
+	}
+}
+
+stock void VerifyNatives()
+{
+	VerifyNative_SbChecker();
+	VerifyNative_ExtDiscord();
+}
+
+stock void VerifyNative_SbChecker()
+{
+	g_bNative_SbChecker_Bans = g_Plugin_SourceBans && CanTestFeatures() && GetFeatureStatus(FeatureType_Native, "SBPP_CheckerGetClientsBans") == FeatureStatus_Available;
+	g_bNative_SbChecker_Mutes = g_Plugin_SourceBans && CanTestFeatures() && GetFeatureStatus(FeatureType_Native, "SBPP_CheckerGetClientsMutes") == FeatureStatus_Available;
+	g_bNative_SbChecker_Gags = g_Plugin_SourceBans && CanTestFeatures() && GetFeatureStatus(FeatureType_Native, "SBPP_CheckerGetClientsGags") == FeatureStatus_Available;
+}
+
+stock void VerifyNative_ExtDiscord()
+{
+	g_bNative_ExtDiscord = g_Plugin_ExtDiscord && CanTestFeatures() && GetFeatureStatus(FeatureType_Native, "ExtendedDiscord_LogError") == FeatureStatus_Available;
 }
 
 public void OnMapInit(const char[] mapName)
@@ -86,19 +123,23 @@ public void AntiBhopCheat_OnClientDetected(int client, char[] sReason, char[] sS
 	GetClientAuthId(client, AuthId_Steam3, sAuth, sizeof(sAuth), false);
 
 	char sPlayer[256];
-	if (g_Plugin_SourceBans) {
-		int iClientBans = 0;
-		int iClientComms = 0;
+	
+	int iClientBans = 0;
+	int iClientMutes = 0;
+	int iClientGags = 0;
 
 	#if defined _sourcebanschecker_included
+	if (g_bNative_SbChecker_Bans)
 		iClientBans = SBPP_CheckerGetClientsBans(client);
-		iClientComms = SBPP_CheckerGetClientsComms(client);
+
+	if (g_bNative_SbChecker_Mutes)
+		iClientMutes = SBPP_CheckerGetClientsMutes(client);
+
+	if (g_bNative_SbChecker_Gags)
+		iClientGags = SBPP_CheckerGetClientsGags(client);
 	#endif
 
-		FormatEx(sPlayer, sizeof(sPlayer), "%N (%d bans - %d comms) %s is suspected of using %s", client, iClientBans, iClientComms, sAuth, sReason);
-	} else {
-		FormatEx(sPlayer, sizeof(sPlayer), "%N %s %s.", client, sAuth, sReason);
-	}
+	FormatEx(sPlayer, sizeof(sPlayer), "%N (%d bans - %d mutes - %d gags) %s is suspected of using %s", client, iClientBans, iClientMutes, iClientGags, sAuth, sReason);
 
 	char sTime[64];
 	int iTime = GetTime();
@@ -195,7 +236,7 @@ public void OnWebHookExecuted(HTTPResponse response, DataPack pack)
 				return;
 			}
 		} else {
-			if (!g_Plugin_ExtDiscord) {
+			if (!g_bNative_ExtDiscord) {
 				LogError("[%s] Failed to send the webhook after %d retries, aborting.", g_sPluginName, retries);
 				LogError("[%s] Failed message : %s", g_sPluginName, sMessage);
 			}
