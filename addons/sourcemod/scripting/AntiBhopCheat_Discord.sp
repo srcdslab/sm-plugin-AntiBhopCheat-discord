@@ -12,7 +12,7 @@ ConVar g_cvThreadName, g_cvThreadID, g_cvAvatar;
 
 char g_sMap[PLATFORM_MAX_PATH];
 char g_sPluginName[256];
-bool g_Plugin_SourceBans = false;
+bool g_Plugin_SourceChecker = false;
 bool g_Plugin_ExtDiscord = false;
 
 bool g_bNative_ExtDiscord = false;
@@ -25,7 +25,7 @@ public Plugin myinfo =
 	name			= "AntiBhopCheat Discord",
 	author			= ".Rushaway",
 	description		= "Send webhook when a bhop cheat is detected",
-	version			= "1.1.0",
+	version			= "1.2.0",
 	url				= "https://github.com/srcdslab/sm-plugin-AntiBhopCheat-discord"
 };
 
@@ -53,7 +53,7 @@ public void OnPluginStart()
 
 public void OnAllPluginsLoaded()
 {
-	g_Plugin_SourceBans = LibraryExists("sourcebans++");
+	g_Plugin_SourceChecker = LibraryExists("sourcechecker++");
 	g_Plugin_ExtDiscord = LibraryExists("ExtendedDiscord");
 
 	VerifyNatives();
@@ -61,12 +61,12 @@ public void OnAllPluginsLoaded()
 
 public void OnLibraryAdded(const char[] sName)
 {
-	if (strcmp(sName, "sourcebans++", false) == 0)
+	if (strcmp(sName, "sourcechecker++", false) == 0)
 	{
-		g_Plugin_SourceBans = true;
+		g_Plugin_SourceChecker = true;
 		VerifyNative_SbChecker();
 	}
-	if (strcmp(sName, "ExtendedDiscord", false) == 0)
+	else if (strcmp(sName, "ExtendedDiscord", false) == 0)
 	{
 		g_Plugin_ExtDiscord = true;
 		VerifyNative_ExtDiscord();
@@ -75,12 +75,12 @@ public void OnLibraryAdded(const char[] sName)
 
 public void OnLibraryRemoved(const char[] sName)
 {
-	if (strcmp(sName, "sourcebans++", false) == 0)
+	if (strcmp(sName, "sourcechecker++", false) == 0)
 	{
-		g_Plugin_SourceBans = false;
+		g_Plugin_SourceChecker = false;
 		VerifyNative_SbChecker();
 	}
-	if (strcmp(sName, "ExtendedDiscord", false) == 0)
+	else if (strcmp(sName, "ExtendedDiscord", false) == 0)
 	{
 		g_Plugin_ExtDiscord = false;
 		VerifyNative_ExtDiscord();
@@ -95,9 +95,9 @@ stock void VerifyNatives()
 
 stock void VerifyNative_SbChecker()
 {
-	g_bNative_SbChecker_Bans = g_Plugin_SourceBans && CanTestFeatures() && GetFeatureStatus(FeatureType_Native, "SBPP_CheckerGetClientsBans") == FeatureStatus_Available;
-	g_bNative_SbChecker_Mutes = g_Plugin_SourceBans && CanTestFeatures() && GetFeatureStatus(FeatureType_Native, "SBPP_CheckerGetClientsMutes") == FeatureStatus_Available;
-	g_bNative_SbChecker_Gags = g_Plugin_SourceBans && CanTestFeatures() && GetFeatureStatus(FeatureType_Native, "SBPP_CheckerGetClientsGags") == FeatureStatus_Available;
+	g_bNative_SbChecker_Bans = g_Plugin_SourceChecker && CanTestFeatures() && GetFeatureStatus(FeatureType_Native, "SBPP_CheckerGetClientsBans") == FeatureStatus_Available;
+	g_bNative_SbChecker_Mutes = g_Plugin_SourceChecker && CanTestFeatures() && GetFeatureStatus(FeatureType_Native, "SBPP_CheckerGetClientsMutes") == FeatureStatus_Available;
+	g_bNative_SbChecker_Gags = g_Plugin_SourceChecker && CanTestFeatures() && GetFeatureStatus(FeatureType_Native, "SBPP_CheckerGetClientsGags") == FeatureStatus_Available;
 }
 
 stock void VerifyNative_ExtDiscord()
