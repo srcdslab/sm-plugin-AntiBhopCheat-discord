@@ -25,7 +25,7 @@ public Plugin myinfo =
 	name			= "AntiBhopCheat Discord",
 	author			= ".Rushaway",
 	description		= "Send webhook when a bhop cheat is detected",
-	version			= "1.2.0",
+	version			= "1.2.1",
 	url				= "https://github.com/srcdslab/sm-plugin-AntiBhopCheat-discord"
 };
 
@@ -123,6 +123,18 @@ public void AntiBhopCheat_OnClientDetected(int client, char[] sReason, char[] sS
 	GetClientAuthId(client, AuthId_Steam3, sAuth, sizeof(sAuth), false);
 
 	char sPlayer[256];
+	FormatEx(sPlayer, sizeof(sPlayer), "%N", client);
+
+	// Replace special characters who could break the message format
+ 	ReplaceString(sPlayer, sizeof(sPlayer), "`", "\\`");
+ 	ReplaceString(sPlayer, sizeof(sPlayer), "*", "\\*");
+ 	ReplaceString(sPlayer, sizeof(sPlayer), "_", "\\_");
+ 	ReplaceString(sPlayer, sizeof(sPlayer), "~", "\\~");
+ 	ReplaceString(sPlayer, sizeof(sPlayer), "|", "\\|");
+ 	ReplaceString(sPlayer, sizeof(sPlayer), "> ", ">");
+ 	ReplaceString(sPlayer, sizeof(sPlayer), "/", "୵"); // Prevent URLs from being embedded
+ 	ReplaceString(sPlayer, sizeof(sPlayer), "@", "ⓐ"); // Because it is a webhook, it bypasses the permission
+ 	ReplaceString(sPlayer, sizeof(sPlayer), "\"", ""); // Prevent messages from being cut off
 	
 	int iClientBans = 0;
 	int iClientMutes = 0;
@@ -139,7 +151,7 @@ public void AntiBhopCheat_OnClientDetected(int client, char[] sReason, char[] sS
 		iClientGags = SBPP_CheckerGetClientsGags(client);
 	#endif
 
-	FormatEx(sPlayer, sizeof(sPlayer), "%N (%d bans - %d mutes - %d gags) %s is suspected of using %s", client, iClientBans, iClientMutes, iClientGags, sAuth, sReason);
+	FormatEx(sPlayer, sizeof(sPlayer), "%s (%d bans - %d mutes - %d gags) %s is suspected of using %s", sPlayer, iClientBans, iClientMutes, iClientGags, sAuth, sReason);
 
 	char sTime[64];
 	int iTime = GetTime();
