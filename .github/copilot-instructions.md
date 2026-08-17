@@ -12,35 +12,51 @@ This repository contains a SourcePawn plugin for SourceMod that integrates with 
 ## Technical Environment
 - **Language**: SourcePawn
 - **Platform**: SourceMod 1.12+ (minimum supported version)
-- **Build System**: SourceKnight v0.2 (`sourceknight.yaml` configuration)
-- **Compiler**: Latest SourcePawn compiler via SourceKnight
+- **Build System**: Native GitHub Actions (`.github/workflows/ci.yml`), no external build tool
+- **Compiler**: SourcePawn compiler (`spcomp`) 1.12.x via `rumblefrog/setup-sp`
 - **CI/CD**: GitHub Actions with automated building and releasing
 
 ## Build & Development Process
 
 ### Building the Plugin
 ```bash
-# Install SourceKnight if not already installed
-# Build using SourceKnight (handles all dependencies automatically)
-sourceknight build
+# Fetch include dependencies
+mkdir -p addons/sourcemod/scripting/include deps
+git clone --depth=1 https://github.com/srcdslab/sm-plugin-UtilsHelper.git deps/utilshelper
+cp -R deps/utilshelper/addons/sourcemod/scripting/include/* addons/sourcemod/scripting/include/
+git clone --depth=1 https://github.com/srcdslab/sm-plugin-DiscordWebhookAPI.git deps/discordwebapi
+cp -R deps/discordwebapi/include/* addons/sourcemod/scripting/include/
+git clone --depth=1 https://github.com/srcdslab/sourcebans-pp.git deps/sourcebans-pp
+cp -R deps/sourcebans-pp/game/addons/sourcemod/scripting/include/* addons/sourcemod/scripting/include/
+git clone --depth=1 https://github.com/srcdslab/sm-plugin-Extended-Discord.git deps/extended-discord
+cp -R deps/extended-discord/addons/sourcemod/scripting/include/* addons/sourcemod/scripting/include/
+git clone --depth=1 https://github.com/srcdslab/sm-plugin-SelectiveBhop.git deps/selectivebhop
+cp -R deps/selectivebhop/addons/sourcemod/scripting/include/* addons/sourcemod/scripting/include/
 
-# Output will be in .sourceknight/package/addons/sourcemod/plugins/
+# Build the plugin
+cd addons/sourcemod/scripting
+mkdir -p ../plugins
+spcomp -i include -o ../plugins/AntiBhopCheat_Discord.smx AntiBhopCheat_Discord.sp
+
+# Output will be in addons/sourcemod/plugins/
 ```
 
 ### Development Workflow
 1. Make changes to `addons/sourcemod/scripting/AntiBhopCheat_Discord.sp`
-2. Build using `sourceknight build`
+2. Build locally using the commands above, or push/open a PR to let CI build it
 3. Test on a development server with SourceMod and AntiBhopCheat installed
 4. CI automatically builds and creates releases on push/PR
 
 ### Dependencies Management
-All dependencies are managed through `sourceknight.yaml`:
-- sourcemod (base platform)
-- utilshelper (utility functions)
-- discordwebapi (webhook functionality)
-- sourcebans-pp (ban information integration)
-- Extended-Discord (enhanced Discord logging)
-- selectivebhop (selective bhop features)
+Dependencies are declared directly as clone+copy steps in `.github/workflows/ci.yml`:
+
+| Include | Repository |
+| --- | --- |
+| `utilshelper` | https://github.com/srcdslab/sm-plugin-UtilsHelper |
+| `discordwebapi` | https://github.com/srcdslab/sm-plugin-DiscordWebhookAPI |
+| `sourcebans-pp` | https://github.com/srcdslab/sourcebans-pp |
+| `Extended-Discord` | https://github.com/srcdslab/sm-plugin-Extended-Discord |
+| `selectivebhop` | https://github.com/srcdslab/sm-plugin-SelectiveBhop |
 
 ## Code Style & Standards
 
@@ -78,17 +94,15 @@ addons/sourcemod/
 
 .github/
 ├── workflows/
-│   └── ci.yml                     # Automated build and release
+│   └── ci.yml                     # Automated build and release (native GitHub Actions)
 └── dependabot.yml                 # Dependency updates
 
-sourceknight.yaml                   # Build configuration and dependencies
 README.md                          # Repository documentation
 ```
 
 ### Key Files
 - **Main Plugin**: `addons/sourcemod/scripting/AntiBhopCheat_Discord.sp`
-- **Build Config**: `sourceknight.yaml` (defines dependencies and build targets)
-- **CI/CD**: `.github/workflows/ci.yml` (automated building via SourceKnight)
+- **CI/CD**: `.github/workflows/ci.yml` (defines dependencies, build, tag, and release jobs)
 
 ### Plugin Architecture
 - **OnPluginStart()**: Initialize ConVars and register library
@@ -194,7 +208,7 @@ if (g_Plugin_NewIntegration) {
 ## Troubleshooting
 
 ### Common Issues
-1. **Build Failures**: Check SourceKnight dependencies in YAML file
+1. **Build Failures**: Check the dependency clone/copy steps in `.github/workflows/ci.yml`
 2. **Webhook Failures**: Verify URL format and Discord permissions
 3. **Missing Dependencies**: Ensure all required plugins are installed
 4. **Character Encoding**: Check for special characters in player names
