@@ -240,7 +240,7 @@ public void OnWebHookExecuted(HTTPResponse response, DataPack pack)
 
 	delete pack;
 	
-	if ((!IsThreadReply && response.Status != HTTPStatus_OK) || (IsThreadReply && response.Status != HTTPStatus_NoContent)) {
+	if (response.Status != HTTPStatus_OK && response.Status != HTTPStatus_NoContent) {
 		if (retries < g_cvWebhookRetry.IntValue) {
 				PrintToServer("[%s] Failed to send the webhook. Resending it .. (%d/%d)", g_sPluginName, retries, g_cvWebhookRetry.IntValue);
 				SendWebHook(sMessage, sWebhookURL);
