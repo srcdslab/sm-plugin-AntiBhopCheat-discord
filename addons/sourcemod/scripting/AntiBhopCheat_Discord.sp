@@ -7,8 +7,8 @@
 #tryinclude <sourcebanschecker>
 #define REQUIRE_PLUGIN
 
-ConVar g_cvCountBots, g_cvWebhook, g_cvWebhookRetry, g_cvChannelType;
-ConVar g_cvThreadName, g_cvThreadID, g_cvAvatar;
+ConVar g_cvCountBots, g_cvWebhook, g_cvWebhookRetry;
+ConVar g_cvThreadName, g_cvThreadID, g_cvAvatar, g_cvUsername;
 
 char g_sMap[PLATFORM_MAX_PATH];
 char g_sPluginName[256];
@@ -25,7 +25,7 @@ public Plugin myinfo =
 	name			= "AntiBhopCheat Discord",
 	author			= ".Rushaway",
 	description		= "Send webhook when a bhop cheat is detected",
-	version			= "1.2.1",
+	version			= "1.3.0",
 	url				= "https://github.com/srcdslab/sm-plugin-AntiBhopCheat-discord"
 };
 
@@ -41,7 +41,7 @@ public void OnPluginStart()
 	g_cvWebhook = CreateConVar("sm_antibhopcheat_discord_webhook", "", "The webhook URL of your Discord channel.", FCVAR_PROTECTED);
 	g_cvWebhookRetry = CreateConVar("sm_antibhopcheat_discord_webhook_retry", "3", "Number of retries if webhook fails.", FCVAR_PROTECTED);
 	g_cvAvatar = CreateConVar("sm_antibhopcheat_discord_avatar", "https://avatars.githubusercontent.com/u/110772618?s=200&v=4", "URL to Avatar image.");
-	g_cvChannelType = CreateConVar("sm_antibhopcheat_discord_channel_type", "0", "Type of your channel: (1 = Thread, 0 = Classic Text channel");
+	g_cvUsername = CreateConVar("sm_antibhopcheat_discord_username", "AntiBhopCheat", "The username to display for the webhook.");
 
 	/* Thread config */
 	g_cvThreadName = CreateConVar("sm_antibhopcheat_discord_threadname", "AntiBhopCheat - New detection", "The Thread Name of your Discord forums. (If not empty, will create a new thread)", FCVAR_PROTECTED);
@@ -194,32 +194,21 @@ stock void SendWebHook(char sMessage[WEBHOOK_MSG_MAX_SIZE], char sWebhookURL[WEB
 	g_cvThreadID.GetString(sThreadID, sizeof sThreadID);
 	g_cvThreadName.GetString(sThreadName, sizeof sThreadName);
 
-	bool IsThread = g_cvChannelType.BoolValue;
-
-	if (IsThread) {
-		if (!sThreadName[0] && !sThreadID[0]) {
-			LogError("[%s] Thread Name or ThreadID not found or specified.", g_sPluginName);
-			delete webhook;
-			return;
-		} else {
-			if (strlen(sThreadName) > 0) {
-				webhook.SetThreadName(sThreadName);
-				sThreadID[0] = '\0';
-			}
-		}
-	}
-
 	char sAvatar[256];
 	g_cvAvatar.GetString(sAvatar, sizeof(sAvatar));
 
+	char sUsername[256];
+	g_cvUsername.GetString(sUsername, sizeof(sUsername));
+
 	if (strlen(sAvatar) > 0)
 		webhook.SetAvatarURL(sAvatar);
+	if (strlen(sUsername) > 0)
+		webhook.SetUsername(sUsername);
+	if (strlen(sThreadName) > 0)
+		webhook.SetThreadName(sThreadName);
 
 	DataPack pack = new DataPack();
-	if (IsThread && strlen(sThreadName) <= 0 && strlen(sThreadID) > 0)
-		pack.WriteCell(1);
-	else
-		pack.WriteCell(0);
+
 	pack.WriteString(sMessage);
 	pack.WriteString(sWebhookURL);
 
@@ -232,8 +221,6 @@ public void OnWebHookExecuted(HTTPResponse response, DataPack pack)
 	static int retries = 0;
 	pack.Reset();
 
-	bool IsThreadReply = pack.ReadCell();
-
 	char sMessage[WEBHOOK_MSG_MAX_SIZE], sWebhookURL[WEBHOOK_URL_MAX_SIZE];
 	pack.ReadString(sMessage, sizeof(sMessage));
 	pack.ReadString(sWebhookURL, sizeof(sWebhookURL));
@@ -242,19 +229,19 @@ public void OnWebHookExecuted(HTTPResponse response, DataPack pack)
 	
 	if (response.Status != HTTPStatus_OK && response.Status != HTTPStatus_NoContent) {
 		if (retries < g_cvWebhookRetry.IntValue) {
-				PrintToServer("[%s] Failed to send the webhook. Resending it .. (%d/%d)", g_sPluginName, retries, g_cvWebhookRetry.IntValue);
+				PrintToServer("[%s] Failed to send the webhook (HTTP %d). Resending it .. (%d/%d)", g_sPluginName, response.Status, retries, g_cvWebhookRetry.IntValue);
 				SendWebHook(sMessage, sWebhookURL);
 				retries++;
 				return;
 			}
 		} else {
 			if (!g_bNative_ExtDiscord) {
-				LogError("[%s] Failed to send the webhook after %d retries, aborting.", g_sPluginName, retries);
+				LogError("[%s] Failed to send the webhook after %d retries (last HTTP status: %d), aborting.", g_sPluginName, retries, response.Status);
 				LogError("[%s] Failed message : %s", g_sPluginName, sMessage);
 			}
 		#if defined _extendeddiscord_included
 			else {
-				ExtendedDiscord_LogError("[%s] Failed to send the webhook after %d retries, aborting.", g_sPluginName, retries);
+				ExtendedDiscord_LogError("[%s] Failed to send the webhook after %d retries (last HTTP status: %d), aborting.", g_sPluginName, retries, response.Status);
 				ExtendedDiscord_LogError("[%s] Failed message : %s", g_sPluginName, sMessage);
 			}
 		#endif
