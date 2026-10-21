@@ -25,7 +25,7 @@ public Plugin myinfo =
 	name			= "AntiBhopCheat Discord",
 	author			= ".Rushaway",
 	description		= "Send webhook when a bhop cheat is detected",
-	version			= "1.3.1",
+	version			= "1.3.2",
 	url				= "https://github.com/srcdslab/sm-plugin-AntiBhopCheat-discord"
 };
 
@@ -48,7 +48,7 @@ public void OnPluginStart()
 	g_cvThreadID = CreateConVar("sm_antibhopcheat_discord_threadid", "0", "If thread_id is provided, the message will send in that thread.", FCVAR_PROTECTED);
 	AutoExecConfig(true);
 
-	GetPluginInfo(INVALID_HANDLE, PlInfo_Name, g_sPluginName, sizeof(g_sPluginName));
+	GetPluginInfo(null, PlInfo_Name, g_sPluginName, sizeof(g_sPluginName));
 }
 
 public void OnAllPluginsLoaded()
