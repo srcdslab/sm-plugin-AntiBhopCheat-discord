@@ -1,6 +1,8 @@
 #include <utilshelper>
 #include <discordWebhookAPI>
 
+#pragma newdecls required
+
 #undef REQUIRE_PLUGIN
 #tryinclude <SelectiveBhop>
 #tryinclude <ExtendedDiscord>
