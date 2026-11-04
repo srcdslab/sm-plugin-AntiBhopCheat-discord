@@ -27,7 +27,7 @@ public Plugin myinfo =
 	name			= "AntiBhopCheat Discord",
 	author			= ".Rushaway",
 	description		= "Send webhook when a bhop cheat is detected",
-	version			= "1.3.2",
+	version			= "1.3.3",
 	url				= "https://github.com/srcdslab/sm-plugin-AntiBhopCheat-discord"
 };
 
